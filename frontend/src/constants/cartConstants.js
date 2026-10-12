@@ -1,0 +1,8 @@
+export const CART_REQUEST = 'CART_REQUEST'
+export const CART_SUCCESS = 'CART_SUCCESS'
+export const CART_FAIL = 'CART_FAIL'
+export const SAVE_SHIPPING_INFO = 'SAVE_SHIPPING_INFO'
+export const CLEAR_CART = 'CLEAR_CART'
+export const REMOVE_DISCOUNT = 'REMOVE_DISCOUNT'
+
+export const CLEAR_ERRORS = 'CLEAR_ERRORS'

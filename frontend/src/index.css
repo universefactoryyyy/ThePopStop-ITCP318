@@ -1,0 +1,161 @@
+/* ---------------------------------------------------------------------------------------------
+   Global styles. Colours come ONLY from the --pop-* variables that src/theme.js writes onto :root
+   (single palette: pastel green + beige). Bootstrap 5 is loaded first (see main.jsx), so the
+   rules below re-skin its buttons / forms / links / badges to the same palette.
+   --------------------------------------------------------------------------------------------- */
+
+:root {
+    --bs-body-font-family: var(--pop-font);
+    --bs-body-color: var(--pop-text);
+    --bs-body-bg: var(--pop-beige100);
+    --bs-border-color: var(--pop-beige300);
+    --bs-link-color: var(--pop-green700);
+    --bs-link-hover-color: var(--pop-text);
+    --bs-border-radius: 12px;
+}
+
+html, body, #root { min-height: 100%; }
+
+body {
+    margin: 0;
+    font-family: var(--pop-font);
+    color: var(--pop-text);
+    background-color: var(--pop-beige100);
+    background-image:
+        radial-gradient(circle at 12% 8%, rgba(168, 213, 186, 0.28) 0, transparent 38%),
+        radial-gradient(circle at 92% 30%, rgba(232, 220, 200, 0.55) 0, transparent 34%);
+    background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6, .heading-font { font-family: var(--pop-font-heading); color: var(--pop-text); }
+
+a { color: var(--pop-green700); text-decoration: none; }
+a:hover { color: var(--pop-text); }
+
+::selection { background: var(--pop-green300); color: var(--pop-text); }
+
+/* ---------- Bootstrap re-skin ---------- */
+.btn { font-weight: 700; border-radius: 999px; padding: 0.5rem 1.25rem; transition: all 0.2s ease; }
+
+.btn-primary {
+    --bs-btn-color: var(--pop-text);
+    --bs-btn-bg: var(--pop-green300);
+    --bs-btn-border-color: var(--pop-green300);
+    --bs-btn-hover-color: var(--pop-white);
+    --bs-btn-hover-bg: var(--pop-green500);
+    --bs-btn-hover-border-color: var(--pop-green500);
+    --bs-btn-active-color: var(--pop-white);
+    --bs-btn-active-bg: var(--pop-green700);
+    --bs-btn-active-border-color: var(--pop-green700);
+    --bs-btn-disabled-color: var(--pop-textMuted);
+    --bs-btn-disabled-bg: var(--pop-green100);
+    --bs-btn-disabled-border-color: var(--pop-green100);
+    --bs-btn-focus-shadow-rgb: 111, 174, 136;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--pop-green700);
+    --bs-btn-border-color: var(--pop-green300);
+    --bs-btn-hover-color: var(--pop-text);
+    --bs-btn-hover-bg: var(--pop-green300);
+    --bs-btn-hover-border-color: var(--pop-green300);
+    --bs-btn-active-color: var(--pop-text);
+    --bs-btn-active-bg: var(--pop-green300);
+    --bs-btn-active-border-color: var(--pop-green300);
+}
+
+.btn-secondary, .btn-light {
+    --bs-btn-color: var(--pop-text);
+    --bs-btn-bg: var(--pop-beige300);
+    --bs-btn-border-color: var(--pop-beige300);
+    --bs-btn-hover-color: var(--pop-text);
+    --bs-btn-hover-bg: var(--pop-beige500);
+    --bs-btn-hover-border-color: var(--pop-beige500);
+    --bs-btn-active-color: var(--pop-text);
+    --bs-btn-active-bg: var(--pop-beige500);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--pop-text);
+    --bs-btn-border-color: var(--pop-beige500);
+    --bs-btn-hover-color: var(--pop-text);
+    --bs-btn-hover-bg: var(--pop-beige300);
+    --bs-btn-hover-border-color: var(--pop-beige500);
+}
+
+.btn-danger {
+    --bs-btn-color: var(--pop-white);
+    --bs-btn-bg: var(--pop-danger);
+    --bs-btn-border-color: var(--pop-danger);
+    --bs-btn-hover-bg: #b45b5b;
+    --bs-btn-hover-border-color: #b45b5b;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--pop-danger);
+    --bs-btn-border-color: var(--pop-danger);
+    --bs-btn-hover-bg: var(--pop-danger);
+    --bs-btn-hover-border-color: var(--pop-danger);
+}
+
+.btn-sm { padding: 0.25rem 0.8rem; }
+
+.form-control, .form-select {
+    background-color: var(--pop-white);
+    border: 1.5px solid var(--pop-beige300);
+    color: var(--pop-text);
+    border-radius: var(--pop-radius-sm);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--pop-green500);
+    box-shadow: 0 0 0 0.2rem rgba(168, 213, 186, 0.45);
+    background-color: var(--pop-white);
+    color: var(--pop-text);
+}
+.form-control::placeholder { color: var(--pop-textMuted); opacity: 0.7; }
+.form-label { font-weight: 700; font-size: 0.9rem; }
+.form-check-input:checked { background-color: var(--pop-green500); border-color: var(--pop-green500); }
+.form-check-input:focus { border-color: var(--pop-green500); box-shadow: 0 0 0 0.2rem rgba(168, 213, 186, 0.45); }
+.invalid-feedback, .text-danger { color: var(--pop-danger) !important; }
+.is-invalid { border-color: var(--pop-danger) !important; }
+
+.card {
+    background: var(--pop-white);
+    border: 1.5px solid var(--pop-beige300);
+    border-radius: var(--pop-radius);
+    box-shadow: var(--pop-shadow);
+}
+.card-header { background: var(--pop-green100); border-bottom: 1.5px solid var(--pop-beige300); font-weight: 700; }
+
+.table { --bs-table-bg: transparent; --bs-table-striped-bg: var(--pop-beige100); --bs-table-border-color: var(--pop-beige300); }
+.table > thead { background: var(--pop-green100); }
+
+.badge.bg-primary { background-color: var(--pop-green300) !important; color: var(--pop-text) !important; }
+.badge.bg-success { background-color: var(--pop-green500) !important; color: var(--pop-white) !important; }
+.badge.bg-warning { background-color: var(--pop-warning) !important; color: var(--pop-text) !important; }
+.badge.bg-danger { background-color: var(--pop-danger) !important; }
+.badge.bg-secondary { background-color: var(--pop-beige300) !important; color: var(--pop-text) !important; }
+.badge.bg-info { background-color: #8FB9C9 !important; color: var(--pop-text) !important; }
+
+.dropdown-menu { border: 1.5px solid var(--pop-beige300); border-radius: var(--pop-radius-sm); box-shadow: var(--pop-shadow); }
+.dropdown-item:hover, .dropdown-item:focus { background: var(--pop-green100); color: var(--pop-text); }
+.dropdown-item.active, .dropdown-item:active { background: var(--pop-green300); color: var(--pop-text); }
+
+.alert-success { --bs-alert-bg: var(--pop-green100); --bs-alert-border-color: var(--pop-green300); --bs-alert-color: var(--pop-text); }
+.alert-info { --bs-alert-bg: var(--pop-beige100); --bs-alert-border-color: var(--pop-beige300); --bs-alert-color: var(--pop-text); }
+
+.pagination { --bs-pagination-active-bg: var(--pop-green300); --bs-pagination-active-border-color: var(--pop-green300); --bs-pagination-active-color: var(--pop-text); --bs-pagination-color: var(--pop-text); }
+
+.spinner-border { color: var(--pop-green500); }
+.text-muted { color: var(--pop-textMuted) !important; }
+
+/* sweetalert2 + toastify follow the theme */
+.swal2-popup { border-radius: var(--pop-radius); font-family: var(--pop-font); background: var(--pop-white); color: var(--pop-text); }
+.swal2-title { font-family: var(--pop-font-heading); color: var(--pop-text); }
+.swal2-styled.swal2-confirm { background-color: var(--pop-green300) !important; color: var(--pop-text) !important; border-radius: 999px; font-weight: 700; }
+.swal2-styled.swal2-cancel { background-color: var(--pop-beige300) !important; color: var(--pop-text) !important; border-radius: 999px; font-weight: 700; }
+.Toastify__toast { font-family: var(--pop-font); border-radius: var(--pop-radius-sm); color: var(--pop-text); }
+.Toastify__progress-bar { background: var(--pop-green500); }
+
+/* keyboard focus must always be visible */
+:focus-visible { outline: 3px solid var(--pop-green500); outline-offset: 2px; }
