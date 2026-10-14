@@ -4,14 +4,20 @@ import Slider from '@mui/material/Slider'
 import Rating from '@mui/material/Rating'
 import { formatPeso } from '../../Utils/helpers'
 
-export const EMPTY_FILTERS = { price: null, series: [], brand: [], ratings: 0 }
+export const EMPTY_FILTERS = { price: null, series: [], brand: [], ratings: 0, reviews: 0 }
 
 export const countActiveFilters = (filters) =>
-    (filters.price ? 1 : 0) + filters.series.length + filters.brand.length + (filters.ratings ? 1 : 0)
+    (filters.price ? 1 : 0) + filters.series.length + filters.brand.length + (filters.ratings ? 1 : 0) + (filters.reviews ? 1 : 0)
 
 const toggle = (list, value) => (list.includes(value) ? list.filter(v => v !== value) : [...list, value])
 
-// Multi-criteria filters: price range, category (series), brand and star rating
+const REVIEW_OPTIONS = [
+    { value: 1, label: 'Has reviews' },
+    { value: 5, label: '5 or more reviews' },
+    { value: 10, label: '10 or more reviews' },
+]
+
+// Multi-criteria filters: price, category (series), ratings, and number of reviews
 const ProductFilters = ({ filters, options, onChange }) => {
     const { minPrice, maxPrice, series, brands } = options
     const [priceDraft, setPriceDraft] = useState([minPrice, maxPrice])
@@ -93,7 +99,7 @@ const ProductFilters = ({ filters, options, onChange }) => {
                     ))}
                 </section>
 
-                <section>
+                <section className="mb-4">
                     <h6>Rating</h6>
                     <Form.Check
                         type="radio"
@@ -116,6 +122,29 @@ const ProductFilters = ({ filters, options, onChange }) => {
                                     <Rating value={stars} readOnly size="small" /> &amp; up
                                 </span>
                             }
+                        />
+                    ))}
+                </section>
+
+                <section>
+                    <h6>Reviews</h6>
+                    <Form.Check
+                        type="radio"
+                        name="reviews"
+                        id="reviews-any"
+                        label="Any number of reviews"
+                        checked={!filters.reviews}
+                        onChange={() => onChange({ ...filters, reviews: 0 })}
+                    />
+                    {REVIEW_OPTIONS.map(option => (
+                        <Form.Check
+                            type="radio"
+                            name="reviews"
+                            key={option.value}
+                            id={`reviews-${option.value}`}
+                            label={option.label}
+                            checked={filters.reviews === option.value}
+                            onChange={() => onChange({ ...filters, reviews: option.value })}
                         />
                     ))}
                 </section>

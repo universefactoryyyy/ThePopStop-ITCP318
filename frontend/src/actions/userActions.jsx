@@ -7,7 +7,7 @@ import {
     deleteUser as deleteFirebaseUser,
     sendPasswordResetEmail,
 } from 'firebase/auth'
-import { auth, googleProvider } from '../firebase'
+import { auth, googleProvider, facebookProvider } from '../firebase'
 import { getErrorMessage } from '../Utils/helpers'
 import {
     LOGIN_REQUEST,
@@ -79,11 +79,10 @@ export const login = (identifier, password) => async (dispatch) => {
     }
 }
 
-// Google sign-in (Firebase popup). The same endpoint works for any other Firebase provider (e.g. Facebook).
-export const loginWithGoogle = () => async (dispatch) => {
+const loginWithFirebaseProvider = (provider) => async (dispatch) => {
     try {
         dispatch({ type: LOGIN_REQUEST })
-        const credential = await signInWithPopup(auth, googleProvider)
+        const credential = await signInWithPopup(auth, provider)
         const user = await exchangeToken(credential.user, '/login/social')
         await signOut(auth)
 
@@ -98,6 +97,9 @@ export const loginWithGoogle = () => async (dispatch) => {
         })
     }
 }
+
+export const loginWithGoogle = () => loginWithFirebaseProvider(googleProvider)
+export const loginWithFacebook = () => loginWithFirebaseProvider(facebookProvider)
 
 // userData = FormData with the profile fields (+ avatar). Creates the Firebase account first, then the profile.
 export const register = (userData, email, password) => async (dispatch) => {

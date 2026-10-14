@@ -49,7 +49,7 @@ Each time an admin changes an order's status, the customer gets an email (items,
 2. **Build > Authentication > Get started > Sign-in method**:
    - Enable **Email/Password**.
    - Enable **Google**. Choose a project support email and save.
-   - Facebook is optional. If you enable it you need a Facebook developer app ID and secret. The backend endpoint `/api/v1/login/social` accepts any Firebase provider, but the frontend only shows the Google button.
+   - Enable **Facebook** (optional but shown on the login/register pages). Create an app at https://developers.facebook.com, copy the App ID and App Secret into Firebase, and add `https://<your-project-id>.firebaseapp.com/__/auth/handler` as a Valid OAuth Redirect URI in the Facebook app. The backend endpoint `/api/v1/login/social` accepts any Firebase provider.
 3. **Authentication > Settings > Authorized domains**. `localhost` is there by default. Add your deployed domain later when you publish.
 4. **Project settings (gear icon) > General > Your apps > Web (`</>`)**. Register an app (any nickname). Copy the config values into the frontend `.env` (`VITE_FIREBASE_*`, see section 6).
 5. **Project settings > Service accounts > Generate new private key**. A JSON file downloads.
@@ -181,12 +181,13 @@ In another terminal run the frontend (`npm run dev`), then visit `http://localho
 | --- | --- |
 | Products CRUD, multi-photo upload | `backend/controllers/product.js`, `frontend/src/Components/Admin/{ProductsList,ProductForm}.jsx` |
 | Admin DataGrid (search, sort, pagination, bulk delete) | `frontend/src/Components/Admin/ProductsList.jsx` |
-| Auth (Firebase, Google, profile photo) | `backend/controllers/auth.js`, `frontend/src/Components/User/*`, `frontend/src/firebase.js` |
+| Auth (Firebase, Google + Facebook, profile photo) | `backend/controllers/auth.js`, `frontend/src/Components/User/*`, `frontend/src/firebase.js` |
+| Form validation | Formik + Yup on product CRUD and login; React Hook Form + Yup on update profile (`frontend/src/Utils/validation.js`) |
 | Reviews, bad-word masking | `backend/controllers/review.js` + `backend/utils/filterProfanity.js`, `frontend/src/Components/Review/*` |
 | Orders, status emails, PDF receipt | `backend/controllers/order.js`, `backend/utils/{sendEmail,emailTemplates,generatePDF}.js` |
-| Filters and infinite scroll | `frontend/src/Components/Product/{ProductCatalog,ProductFilters}.jsx` |
+| Filters (price, category, ratings, reviews) and infinite scroll | `frontend/src/Components/Product/{ProductCatalog,ProductFilters}.jsx` |
 | Charts (monthly + date range) | `frontend/src/Components/Admin/{Dashboard,Reports}.jsx` |
-| Theme (pastel green and beige) | `frontend/src/theme.js`, `frontend/src/index.css` |
+| Theme (pastel green and beige, MUI + Bootstrap) | `frontend/src/theme.js`, `frontend/src/index.css` |
 
 ## 10. Troubleshooting
 

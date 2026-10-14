@@ -26,29 +26,35 @@ class APIFeatures {
         return this;
     }
 
-    // http://localhost:4001/api/v1/products?price[gte]=100&price[lte]=1000&series=Crybaby&brand=Pop%20Mart&ratings[gte]=4
-    filter() {
-        const q = this.queryStr;
+        // http://localhost:4001/api/v1/products?price[gte]=100&price[lte]=1000&series=Crybaby&brand=Pop%20Mart&ratings[gte]=4&numOfReviews[gte]=1
+        filter() {
+            const q = this.queryStr;
 
-        const priceGte = Number(q['price[gte]']);
-        const priceLte = Number(q['price[lte]']);
-        const price = {};
-        if (q['price[gte]'] !== undefined && q['price[gte]'] !== '' && !Number.isNaN(priceGte)) price.$gte = priceGte;
-        if (q['price[lte]'] !== undefined && q['price[lte]'] !== '' && !Number.isNaN(priceLte)) price.$lte = priceLte;
-        if (Object.keys(price).length) this.apply({ price });
+            const priceGte = Number(q['price[gte]']);
+            const priceLte = Number(q['price[lte]']);
+            const price = {};
+            if (q['price[gte]'] !== undefined && q['price[gte]'] !== '' && !Number.isNaN(priceGte)) price.$gte = priceGte;
+            if (q['price[lte]'] !== undefined && q['price[lte]'] !== '' && !Number.isNaN(priceLte)) price.$lte = priceLte;
+            if (Object.keys(price).length) this.apply({ price });
 
-        // category = series (can be several, comma separated)
-        if (q.series) this.apply({ series: { $in: String(q.series).split(',').map(s => s.trim()).filter(Boolean) } });
-        if (q.brand) this.apply({ brand: { $in: String(q.brand).split(',').map(s => s.trim()).filter(Boolean) } });
+            // category = series (can be several, comma separated)
+            if (q.series) this.apply({ series: { $in: String(q.series).split(',').map(s => s.trim()).filter(Boolean) } });
+            if (q.brand) this.apply({ brand: { $in: String(q.brand).split(',').map(s => s.trim()).filter(Boolean) } });
 
-        const ratingsGte = Number(q['ratings[gte]']);
-        if (q['ratings[gte]'] !== undefined && q['ratings[gte]'] !== '' && !Number.isNaN(ratingsGte) && ratingsGte > 0) {
-            this.apply({ ratings: { $gte: ratingsGte } });
+            const ratingsGte = Number(q['ratings[gte]']);
+            if (q['ratings[gte]'] !== undefined && q['ratings[gte]'] !== '' && !Number.isNaN(ratingsGte) && ratingsGte > 0) {
+                this.apply({ ratings: { $gte: ratingsGte } });
+            }
+
+            // review filter: products with at least N customer reviews
+            const reviewsGte = Number(q['numOfReviews[gte]']);
+            if (q['numOfReviews[gte]'] !== undefined && q['numOfReviews[gte]'] !== '' && !Number.isNaN(reviewsGte) && reviewsGte > 0) {
+                this.apply({ numOfReviews: { $gte: reviewsGte } });
+            }
+
+            if (q.status) this.apply({ status: q.status });
+            return this;
         }
-
-        if (q.status) this.apply({ status: q.status });
-        return this;
-    }
 
     sort() {
         const sorts = {

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Formik, Form } from 'formik'
+import { FormProvider, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
 import { updateProfile, clearErrors } from '../../actions/userActions'
 import { UPDATE_PROFILE_RESET } from '../../constants/userConstants'
@@ -9,10 +10,11 @@ import { errMsg, successMsg } from '../../Utils/helpers'
 import { profileShape, validateImageFile } from '../../Utils/validation'
 import MetaData from '../Layout/MetaData'
 import Loader from '../Layout/Loader'
-import FormField from '../Layout/FormField'
+import HookFormField from '../Layout/HookFormField'
 
 const updateSchema = Yup.object(profileShape)
 
+// Update profile uses React Hook Form + Yup (product CRUD and login use Formik + Yup)
 const UpdateProfile = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -22,6 +24,31 @@ const UpdateProfile = () => {
     const [avatar, setAvatar] = useState(null)
     const [avatarPreview, setAvatarPreview] = useState('')
     const [avatarError, setAvatarError] = useState('')
+
+    const methods = useForm({
+        resolver: yupResolver(updateSchema),
+        mode: 'onTouched',
+        defaultValues: {
+            fname: '',
+            lname: '',
+            username: '',
+            phone: '',
+            addressline: '',
+            zipcode: '',
+        },
+    })
+
+    useEffect(() => {
+        if (!user) return
+        methods.reset({
+            fname: user.fname || '',
+            lname: user.lname || '',
+            username: user.username || '',
+            phone: user.phone || '',
+            addressline: user.addressline || '',
+            zipcode: user.zipcode || '',
+        })
+    }, [user, methods])
 
     useEffect(() => {
         if (error) {
@@ -55,7 +82,7 @@ const UpdateProfile = () => {
 
     const submit = (values) => {
         const formData = new FormData()
-        ;['fname', 'lname', 'username', 'phone', 'addressline', 'zipcode'].forEach(key => formData.set(key, values[key].trim()))
+        ;['fname', 'lname', 'username', 'phone', 'addressline', 'zipcode'].forEach(key => formData.set(key, String(values[key] || '').trim()))
         if (avatar) formData.set('avatar', avatar)
         dispatch(updateProfile(formData))
     }
@@ -71,20 +98,8 @@ const UpdateProfile = () => {
                         <div className="card-body p-4">
                             <h2 className="text-center mb-4">Update profile</h2>
 
-                            <Formik
-                                enableReinitialize
-                                initialValues={{
-                                    fname: user.fname || '',
-                                    lname: user.lname || '',
-                                    username: user.username || '',
-                                    phone: user.phone || '',
-                                    addressline: user.addressline || '',
-                                    zipcode: user.zipcode || '',
-                                }}
-                                validationSchema={updateSchema}
-                                onSubmit={submit}
-                            >
-                                <Form noValidate>
+                            <FormProvider {...methods}>
+                                <form noValidate onSubmit={methods.handleSubmit(submit)}>
                                     <div className="d-flex align-items-center gap-3 mb-3">
                                         {currentAvatar
                                             ? <img src={currentAvatar} alt="Avatar" className="pop-avatar pop-avatar-lg" />
@@ -107,15 +122,15 @@ const UpdateProfile = () => {
                                         <input id="email" className="form-control" value={user.email} disabled readOnly />
                                     </div>
                                     <div className="row">
-                                        <FormField className="col-md-6" label="First name" name="fname" type="text" />
-                                        <FormField className="col-md-6" label="Last name" name="lname" type="text" />
+                                        <HookFormField className="col-md-6" label="First name" name="fname" type="text" />
+                                        <HookFormField className="col-md-6" label="Last name" name="lname" type="text" />
                                     </div>
                                     <div className="row">
-                                        <FormField className="col-md-6" label="Username" name="username" type="text" />
-                                        <FormField className="col-md-6" label="Phone" name="phone" type="tel" />
+                                        <HookFormField className="col-md-6" label="Username" name="username" type="text" />
+                                        <HookFormField className="col-md-6" label="Phone" name="phone" type="tel" />
                                     </div>
-                                    <FormField label="Address" name="addressline" type="text" />
-                                    <FormField label="Zip code" name="zipcode" type="text" />
+                                    <HookFormField label="Address" name="addressline" type="text" />
+                                    <HookFormField label="Zip code" name="zipcode" type="text" />
 
                                     <div className="d-flex gap-2">
                                         <button type="submit" className="btn btn-primary flex-grow-1" disabled={loading}>
@@ -123,8 +138,8 @@ const UpdateProfile = () => {
                                         </button>
                                         <Link to="/me" className="btn btn-outline-primary">Cancel</Link>
                                     </div>
-                                </Form>
-                            </Formik>
+                                </form>
+                            </FormProvider>
                         </div>
                     </div>
                 </div>

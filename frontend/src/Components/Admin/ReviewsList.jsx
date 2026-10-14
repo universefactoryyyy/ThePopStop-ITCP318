@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
@@ -14,6 +14,8 @@ const ReviewsList = () => {
     const dispatch = useDispatch()
     const { loading, error, reviews } = useSelector(state => state.reviews)
     const { error: actionError, isDeleted } = useSelector(state => state.review)
+    const [ratingFilter, setRatingFilter] = useState(0)
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
         dispatch(getAllReviews())
@@ -31,6 +33,17 @@ const ReviewsList = () => {
             dispatch(getAllReviews())
         }
     }, [isDeleted, dispatch])
+
+    const rows = useMemo(() => {
+        const term = search.trim().toLowerCase()
+        return reviews.filter(review => {
+            if (ratingFilter && review.rating !== ratingFilter) return false
+            if (!term) return true
+            const productName = review.product ? review.product.name : ''
+            const userName = review.user ? review.user.name : ''
+            return [productName, userName, review.comment].some(value => String(value || '').toLowerCase().includes(term))
+        })
+    }, [reviews, ratingFilter, search])
 
     const confirmDelete = async (review) => {
         const result = await Swal.fire({
@@ -85,9 +98,32 @@ const ReviewsList = () => {
         <div>
             <MetaData title="Reviews" />
             <h2 className="mb-3">Reviews</h2>
+            <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <input
+                    type="search"
+                    className="form-control"
+                    style={{ maxWidth: 280 }}
+                    placeholder="Search product, customer or comment"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    aria-label="Search reviews"
+                />
+                <select
+                    className="form-select"
+                    style={{ maxWidth: 180 }}
+                    value={ratingFilter}
+                    onChange={(e) => setRatingFilter(Number(e.target.value))}
+                    aria-label="Filter reviews by rating"
+                >
+                    <option value={0}>All ratings</option>
+                    {[5, 4, 3, 2, 1].map(stars => (
+                        <option key={stars} value={stars}>{stars} star{stars === 1 ? '' : 's'}</option>
+                    ))}
+                </select>
+            </div>
             <div className="pop-grid-wrap">
                 <DataGrid
-                    rows={reviews}
+                    rows={rows}
                     columns={columns}
                     getRowId={(row) => row._id}
                     loading={loading}

@@ -25,6 +25,7 @@ const FIREBASE_USERS = {
     'tok-cust1': { uid: 'uid-cust1', email: 'cust1@example.com', email_verified: false },
     'tok-cust2': { uid: 'uid-cust2', email: 'cust2@example.com', email_verified: false },
     'tok-google': { uid: 'uid-google', email: 'gina@gmail.com', email_verified: true, name: 'Gina Google', picture: 'https://example.com/gina.png' },
+    'tok-facebook': { uid: 'uid-facebook', email: 'fay@facebook.com', email_verified: true, name: 'Fay Facebook', picture: 'https://example.com/fay.png' },
     'tok-unverified-admin': { uid: 'uid-evil', email: 'admin@popstop.com', email_verified: false },
 };
 firebase.verifyFirebaseToken = async (token) => {
@@ -195,13 +196,18 @@ const run = async () => {
         assert.strictEqual(ok.data.email, 'cust1@example.com');
         assert.strictEqual((await guest.post('/login/lookup', { identifier: 'nobody' })).status, 401);
     });
-    await step('Google sign-in creates a profile on first use', async () => {
+    await step('Google and Facebook (Firebase) sign-in create a profile on first use', async () => {
         const g = makeClient();
         const r = await g.post('/login/social', { idToken: 'tok-google' });
         assert.strictEqual(r.status, 201);
         assert.strictEqual(r.data.user.fname, 'Gina');
         const again = await g.post('/login/social', { idToken: 'tok-google' });
         assert.strictEqual(again.status, 200);
+        const fb = makeClient();
+        const facebook = await fb.post('/login/social', { idToken: 'tok-facebook' });
+        assert.strictEqual(facebook.status, 201);
+        assert.strictEqual(facebook.data.user.fname, 'Fay');
+        assert.strictEqual(facebook.data.user.lname, 'Facebook');
     });
     await step('profile update with new photo (old Cloudinary photo removed)', async () => {
         const r = await cust1.form('PUT', '/me/update', { fname: 'Cara', lname: 'Updated', username: 'cara_c', phone: '09999999999', addressline: 'New Address 5', zipcode: '2000' }, [{ field: 'avatar', name: 'new.png' }]);
@@ -237,6 +243,7 @@ const run = async () => {
         assert.strictEqual(price.data.filteredProductsCount, 10);  // nine 1700-priced figures + the 1195 Funko
         assert.ok(price.data.products.every(p => p.price >= 1000 && p.price <= 2000));
         assert.strictEqual((await guest.get('/products?ratings[gte]=4')).data.filteredProductsCount, 0);
+        assert.strictEqual((await guest.get('/products?numOfReviews[gte]=1')).data.filteredProductsCount, 0);
         const sorted = (await guest.get('/products?sort=price_desc&limit=3')).data.products;
         assert.strictEqual(sorted[0].price, 7280);
         assert.strictEqual((await guest.get('/products?keyword=%5B')).status, 200);  // regex characters are escaped
@@ -433,6 +440,8 @@ const run = async () => {
         assert.strictEqual(list.data.reviews.length, 1);
         assert.strictEqual(list.data.reviews[0].user.name, 'Cara Updated');
         assert.strictEqual((await guest.get('/products?ratings[gte]=3')).data.filteredProductsCount, 1);
+        assert.strictEqual((await guest.get('/products?numOfReviews[gte]=1')).data.filteredProductsCount, 1);
+        assert.strictEqual((await guest.get('/products?numOfReviews[gte]=5')).data.filteredProductsCount, 0);
     });
     await step('reviews: only admin can delete a review', async () => {
         assert.strictEqual((await cust1.del(`/admin/review/${reviewId}`)).status, 403);

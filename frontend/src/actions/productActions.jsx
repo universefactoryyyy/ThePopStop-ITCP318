@@ -36,7 +36,7 @@ const API = import.meta.env.VITE_API
 // only the response of the newest request may update the list (fast filter changes / scrolling)
 let latestProductsRequest = 0
 
-// filters: { keyword, page, limit, sort, price: [min, max], series: [], brand: [], ratings }
+// filters: { keyword, page, limit, sort, price: [min, max], series: [], brand: [], ratings, reviews }
 export const getProducts = (filters = {}) => async (dispatch) => {
     const requestId = ++latestProductsRequest
     const page = filters.page || 1
@@ -53,6 +53,7 @@ export const getProducts = (filters = {}) => async (dispatch) => {
         if (filters.series && filters.series.length) params.series = filters.series.join(',')
         if (filters.brand && filters.brand.length) params.brand = filters.brand.join(',')
         if (filters.ratings) params['ratings[gte]'] = filters.ratings
+        if (filters.reviews) params['numOfReviews[gte]'] = filters.reviews
 
         const { data } = await axios.get(`${API}/products`, { params })
         if (requestId !== latestProductsRequest) return

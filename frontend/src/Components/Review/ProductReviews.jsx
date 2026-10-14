@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import Swal from 'sweetalert2'
@@ -35,6 +35,17 @@ const ProductReviews = ({ product }) => {
 
     const isAdmin = Boolean(user && user.role === 'admin')
     const userId = user && user._id
+    const [ratingFilter, setRatingFilter] = useState(0)
+
+    const visibleReviews = useMemo(
+        () => (ratingFilter ? reviews.filter(review => review.rating === ratingFilter) : reviews),
+        [reviews, ratingFilter]
+    )
+    const ratingCounts = useMemo(() => {
+        const counts = { 0: reviews.length, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        reviews.forEach(review => { if (counts[review.rating] !== undefined) counts[review.rating] += 1 })
+        return counts
+    }, [reviews])
 
     const refresh = () => {
         dispatch(getProductReviews(product._id))
@@ -43,6 +54,7 @@ const ProductReviews = ({ product }) => {
     }
 
     useEffect(() => {
+        setRatingFilter(0)
         dispatch(getProductReviews(product._id))
         if (isAuthenticated) dispatch(getReviewEligibility(product._id))
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,8 +128,31 @@ const ProductReviews = ({ product }) => {
             ) : reviews.length === 0 ? (
                 <p className="text-muted">No reviews yet. Be the first to share your thoughts!</p>
             ) : (
+                <>
+                <div className="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Filter reviews by rating">
+                    <button
+                        type="button"
+                        className={`btn btn-sm ${ratingFilter === 0 ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => setRatingFilter(0)}
+                    >
+                        All ({ratingCounts[0]})
+                    </button>
+                    {[5, 4, 3, 2, 1].map(stars => (
+                        <button
+                            type="button"
+                            key={stars}
+                            className={`btn btn-sm ${ratingFilter === stars ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => setRatingFilter(stars)}
+                        >
+                            {stars} star{stars === 1 ? '' : 's'} ({ratingCounts[stars]})
+                        </button>
+                    ))}
+                </div>
+                {visibleReviews.length === 0 ? (
+                    <p className="text-muted">No {ratingFilter}-star reviews yet.</p>
+                ) : (
                 <ul className="list-unstyled pop-review-list">
-                    {reviews.map(review => (
+                    {visibleReviews.map(review => (
                         <li key={review._id} className="card mb-3">
                             <div className="card-body d-flex gap-3">
                                 <Avatar user={review.user} />
@@ -149,6 +184,8 @@ const ProductReviews = ({ product }) => {
                         </li>
                     ))}
                 </ul>
+                )}
+                </>
             )}
         </section>
     )

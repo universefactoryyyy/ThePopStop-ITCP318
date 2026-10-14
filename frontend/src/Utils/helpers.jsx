@@ -58,6 +58,7 @@ const FIREBASE_MESSAGES = {
     'auth/popup-blocked': 'Your browser blocked the sign-in popup. Please allow popups and try again',
     'auth/unauthorized-domain': 'This domain is not authorized in Firebase (Authentication > Settings > Authorized domains)',
     'auth/operation-not-allowed': 'This sign-in method is not enabled in the Firebase console',
+    'auth/account-exists-with-different-credential': 'An account already exists with this email using a different sign-in method',
     'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'Firebase is not configured. Check VITE_FIREBASE_* in frontend/.env',
     'auth/invalid-api-key': 'Firebase is not configured. Check VITE_FIREBASE_* in frontend/.env',
     'auth/configuration-not-found': 'Email/Password sign-in is not enabled in the Firebase console',

@@ -9,6 +9,7 @@ import { profileShape, validateImageFile } from '../../Utils/validation'
 import { isFirebaseConfigured } from '../../firebase'
 import MetaData from '../Layout/MetaData'
 import FormField from '../Layout/FormField'
+import SocialLogin from './SocialLogin'
 
 const registerSchema = Yup.object({
     ...profileShape,
@@ -126,6 +127,8 @@ const Register = () => {
                                     </button>
                                 </Form>
                             </Formik>
+
+                            <SocialLogin loading={loading} />
 
                             <p className="text-center mt-4 mb-0">
                                 Already have an account? <Link to="/login">Login</Link>

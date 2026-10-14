@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
-import GoogleIcon from '@mui/icons-material/Google'
-import { login, loginWithGoogle, clearErrors } from '../../actions/userActions'
+import { login, clearErrors } from '../../actions/userActions'
 import { errMsg } from '../../Utils/helpers'
 import { isFirebaseConfigured } from '../../firebase'
 import MetaData from '../Layout/MetaData'
 import FormField from '../Layout/FormField'
+import SocialLogin from './SocialLogin'
 
+// Login uses Formik + Yup (product CRUD also uses Formik; update profile uses React Hook Form)
 const loginSchema = Yup.object({
     identifier: Yup.string().trim().required('Enter your email or username'),
     password: Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
@@ -71,16 +72,7 @@ const Login = () => {
                                 </Form>
                             </Formik>
 
-                            <div className="pop-divider"><span>or</span></div>
-
-                            <button
-                                type="button"
-                                className="btn btn-outline-primary w-100 d-inline-flex align-items-center justify-content-center gap-2"
-                                onClick={() => dispatch(loginWithGoogle())}
-                                disabled={loading}
-                            >
-                                <GoogleIcon fontSize="small" /> Continue with Google
-                            </button>
+                            <SocialLogin loading={loading} />
 
                             <p className="text-center mt-4 mb-0">
                                 New to The Pop Stop? <Link to="/register">Create an account</Link>
