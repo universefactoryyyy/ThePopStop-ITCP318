@@ -191,6 +191,7 @@ In another terminal run the frontend (`npm run dev`), then visit `http://localho
 
 ## 10. Troubleshooting
 
+- **`querySrv ECONNREFUSED`**: Node's DNS resolver is using `127.0.0.1` and nothing is listening there. `backend/config/env.js` switches that lookup to public DNS before connecting. The Atlas username, password, and cluster host can still be correct.
 - **`MongooseServerSelectionError`**: your IP is not allowed in Atlas Network Access, or the username/password in `DB_URI` is wrong or not URL-encoded.
 - **Login says "Firebase is not configured"**: the `VITE_FIREBASE_*` values are missing, or you did not restart Vite.
 - **Login returns 401 or "invalid token"**: the service account belongs to a different Firebase project than the web config.
