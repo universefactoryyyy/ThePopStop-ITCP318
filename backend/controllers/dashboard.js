@@ -24,13 +24,14 @@ const isDateString = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || '') && !Numb
 
 // GET /api/v1/admin/stats - numbers for the dashboard cards
 exports.getDashboardStats = async (req, res) => {
-    const [totalProducts, lowStock, outOfStock, totalUsers, totalOrders, pendingOrders, revenue] = await Promise.all([
+    const [totalProducts, lowStock, outOfStock, totalUsers, totalOrders, pendingOrders, completedOrders, revenue] = await Promise.all([
         Product.countDocuments({ deletedAt: null }),
         Product.countDocuments({ deletedAt: null, status: 'Low Stock' }),
         Product.countDocuments({ deletedAt: null, status: 'Out of Stock' }),
         User.countDocuments({ deletedAt: null }),
         Order.countDocuments(),
         Order.countDocuments({ orderStatus: 'Pending' }),
+        Order.countDocuments({ orderStatus: 'Delivered' }),
         Order.aggregate([{ $match: SALES_MATCH }, { $group: { _id: null, total: { $sum: '$totalPrice' } } }])
     ]);
 
@@ -43,6 +44,7 @@ exports.getDashboardStats = async (req, res) => {
             totalUsers,
             totalOrders,
             pendingOrders,
+            completedOrders,
             totalRevenue: revenue.length ? revenue[0].total : 0
         }
     });

@@ -25,7 +25,7 @@ const FIREBASE_USERS = {
     'tok-cust1': { uid: 'uid-cust1', email: 'cust1@example.com', email_verified: false },
     'tok-cust2': { uid: 'uid-cust2', email: 'cust2@example.com', email_verified: false },
     'tok-google': { uid: 'uid-google', email: 'gina@gmail.com', email_verified: true, name: 'Gina Google', picture: 'https://example.com/gina.png' },
-    'tok-facebook': { uid: 'uid-facebook', email: 'fay@facebook.com', email_verified: true, name: 'Fay Facebook', picture: 'https://example.com/fay.png' },
+    'tok-google-nopic': { uid: 'uid-nopic', email: 'nopic@gmail.com', email_verified: true, name: 'No Pic' },
     'tok-unverified-admin': { uid: 'uid-evil', email: 'admin@popstop.com', email_verified: false },
 };
 firebase.verifyFirebaseToken = async (token) => {
@@ -196,18 +196,19 @@ const run = async () => {
         assert.strictEqual(ok.data.email, 'cust1@example.com');
         assert.strictEqual((await guest.post('/login/lookup', { identifier: 'nobody' })).status, 401);
     });
-    await step('Google and Facebook (Firebase) sign-in create a profile on first use', async () => {
+    await step('Google sign-in creates a profile and keeps the Google photo', async () => {
         const g = makeClient();
         const r = await g.post('/login/social', { idToken: 'tok-google' });
         assert.strictEqual(r.status, 201);
         assert.strictEqual(r.data.user.fname, 'Gina');
+        assert.strictEqual(r.data.user.avatar.url, 'https://example.com/gina.png');
         const again = await g.post('/login/social', { idToken: 'tok-google' });
         assert.strictEqual(again.status, 200);
-        const fb = makeClient();
-        const facebook = await fb.post('/login/social', { idToken: 'tok-facebook' });
-        assert.strictEqual(facebook.status, 201);
-        assert.strictEqual(facebook.data.user.fname, 'Fay');
-        assert.strictEqual(facebook.data.user.lname, 'Facebook');
+        assert.strictEqual(again.data.user.avatar.url, 'https://example.com/gina.png');
+        const plain = await makeClient().post('/login/social', { idToken: 'tok-google-nopic' });
+        assert.strictEqual(plain.status, 201);
+        assert.strictEqual(plain.data.user.avatar.url, '');
+        assert.strictEqual(plain.data.user.fname, 'No');
     });
     await step('profile update with new photo (old Cloudinary photo removed)', async () => {
         const r = await cust1.form('PUT', '/me/update', { fname: 'Cara', lname: 'Updated', username: 'cara_c', phone: '09999999999', addressline: 'New Address 5', zipcode: '2000' }, [{ field: 'avatar', name: 'new.png' }]);
@@ -522,6 +523,7 @@ const run = async () => {
         assert.ok((await admin.get('/admin/brand-sales')).data.brandSales.length >= 1);
         const stats = (await admin.get('/admin/stats')).data.stats;
         assert.ok(stats.totalOrders >= 3 && stats.totalProducts === 25);
+        assert.ok(stats.completedOrders >= 1);
     });
     await step('unknown routes and malformed ids return JSON 404', async () => {
         assert.strictEqual((await guest.get('/nope')).status, 404);

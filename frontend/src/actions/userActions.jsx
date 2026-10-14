@@ -7,7 +7,7 @@ import {
     deleteUser as deleteFirebaseUser,
     sendPasswordResetEmail,
 } from 'firebase/auth'
-import { auth, googleProvider, facebookProvider } from '../firebase'
+import { auth, googleProvider } from '../firebase'
 import { getErrorMessage } from '../Utils/helpers'
 import {
     LOGIN_REQUEST,
@@ -99,7 +99,6 @@ const loginWithFirebaseProvider = (provider) => async (dispatch) => {
 }
 
 export const loginWithGoogle = () => loginWithFirebaseProvider(googleProvider)
-export const loginWithFacebook = () => loginWithFirebaseProvider(facebookProvider)
 
 // userData = FormData with the profile fields (+ avatar). Creates the Firebase account first, then the profile.
 export const register = (userData, email, password) => async (dispatch) => {

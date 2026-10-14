@@ -20,7 +20,7 @@ const Footer = () => {
                     </div>
                     <div className="col-6 col-md-4">
                         <h6>Contact Us</h6>
-                        <p className="mb-1">support@thepopstop.com</p>
+                        <p className="mb-1"><a href="mailto:thepopstoppp@gmail.com">thepopstoppp@gmail.com</a></p>
                         <p className="mb-0">+63 912 345 6789</p>
                     </div>
                 </div>

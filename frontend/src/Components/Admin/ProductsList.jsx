@@ -125,7 +125,7 @@ const ProductsList = () => {
             filterable: false,
             disableColumnMenu: true,
             renderCell: (params) => (
-                <div className="d-flex gap-2 align-items-center h-100">
+                <div className="pop-grid-actions">
                     {params.row.deletedAt ? (
                         <button type="button" className="btn btn-sm btn-outline-success" onClick={() => dispatch(restoreProduct(params.row._id))}>Restore</button>
                     ) : (

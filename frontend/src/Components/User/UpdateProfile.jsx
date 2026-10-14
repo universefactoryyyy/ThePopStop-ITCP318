@@ -9,6 +9,7 @@ import { UPDATE_PROFILE_RESET } from '../../constants/userConstants'
 import { errMsg, successMsg } from '../../Utils/helpers'
 import { profileShape, validateImageFile } from '../../Utils/validation'
 import MetaData from '../Layout/MetaData'
+import UserAvatar from '../Layout/UserAvatar'
 import Loader from '../Layout/Loader'
 import HookFormField from '../Layout/HookFormField'
 
@@ -87,7 +88,7 @@ const UpdateProfile = () => {
         dispatch(updateProfile(formData))
     }
 
-    const currentAvatar = avatarPreview || (user.avatar && user.avatar.url)
+    const watchedFname = methods.watch('fname')
 
     return (
         <div className="container-xl pop-page">
@@ -101,9 +102,9 @@ const UpdateProfile = () => {
                             <FormProvider {...methods}>
                                 <form noValidate onSubmit={methods.handleSubmit(submit)}>
                                     <div className="d-flex align-items-center gap-3 mb-3">
-                                        {currentAvatar
-                                            ? <img src={currentAvatar} alt="Avatar" className="pop-avatar pop-avatar-lg" />
-                                            : <span className="pop-avatar pop-avatar-lg pop-avatar-fallback">{user.name.charAt(0).toUpperCase()}</span>}
+                                        {avatarPreview
+                                            ? <img src={avatarPreview} alt="Avatar" className="pop-avatar pop-avatar-lg" />
+                                            : <UserAvatar user={{ ...user, fname: watchedFname || user.fname }} className="pop-avatar pop-avatar-lg" alt={user.name} />}
                                         <div className="flex-grow-1">
                                             <label htmlFor="avatar" className="form-label">Profile photo</label>
                                             <input

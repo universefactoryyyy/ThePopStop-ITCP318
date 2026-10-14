@@ -132,7 +132,7 @@ const DiscountsList = () => {
             sortable: false,
             filterable: false,
             renderCell: (params) => (
-                <div className="d-flex gap-2 align-items-center h-100">
+                <div className="pop-grid-actions">
                     <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setEditing(params.row)}>Edit</button>
                     <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => confirmDelete(params.row)}>Delete</button>
                 </div>

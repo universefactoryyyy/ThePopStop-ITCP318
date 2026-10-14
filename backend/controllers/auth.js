@@ -155,6 +155,16 @@ exports.socialLogin = async (req, res, next) => {
     }
     if (!checkAccountStatus(user, res)) return;
 
+    // Keep a Google photo only until the person uploads their own picture.
+    if (!(user.avatar && user.avatar.public_id)) {
+        const picture = decoded.picture || '';
+        const current = (user.avatar && user.avatar.url) || '';
+        if (current !== picture) {
+            user.avatar = { public_id: '', url: picture };
+            await user.save({ validateBeforeSave: false });
+        }
+    }
+
     sendToken(user, 200, res)
 }
 

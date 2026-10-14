@@ -21,8 +21,8 @@ const defaultRange = () => {
 }
 
 const StatCard = ({ label, value, tone }) => (
-    <div className="col-6 col-xl-3">
-        <div className={`card pop-stat ${tone || ''}`}>
+    <div className="col-6 col-xl-3 d-flex">
+        <div className={`card pop-stat h-100 w-100 ${tone || ''}`}>
             <div className="card-body">
                 <div className="pop-stat-label">{label}</div>
                 <div className="pop-stat-value">{value}</div>
@@ -90,7 +90,8 @@ const Dashboard = () => {
                 <StatCard label="Total revenue" value={formatPeso(stats.totalRevenue)} tone="pop-stat-green" />
                 <StatCard label="Orders" value={stats.totalOrders} tone="pop-stat-beige" />
                 <StatCard label="Pending orders" value={stats.pendingOrders} tone="pop-stat-beige" />
-                <StatCard label="Customers" value={stats.totalUsers} tone="pop-stat-green" />
+                <StatCard label="Completed orders" value={stats.completedOrders} tone="pop-stat-green" />
+                <StatCard label="Customers" value={stats.totalUsers} />
                 <StatCard label="Products" value={stats.totalProducts} />
                 <StatCard label="Low stock" value={stats.lowStock} />
                 <StatCard label="Out of stock" value={stats.outOfStock} />

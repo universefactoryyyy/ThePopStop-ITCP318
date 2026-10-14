@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Formik, Form } from 'formik'
+import { Formik, Form, useFormikContext } from 'formik'
 import * as Yup from 'yup'
 import { register, clearErrors } from '../../actions/userActions'
 import { errMsg, successMsg } from '../../Utils/helpers'
@@ -9,7 +9,15 @@ import { profileShape, validateImageFile } from '../../Utils/validation'
 import { isFirebaseConfigured } from '../../firebase'
 import MetaData from '../Layout/MetaData'
 import FormField from '../Layout/FormField'
+import UserAvatar from '../Layout/UserAvatar'
 import SocialLogin from './SocialLogin'
+
+const RegisterAvatar = ({ preview }) => {
+    const { values } = useFormikContext()
+    if (preview) return <img src={preview} alt="Avatar preview" className="pop-avatar pop-avatar-lg" />
+    const name = `${values.fname || ''} ${values.lname || ''}`.trim()
+    return <UserAvatar user={{ fname: values.fname, name }} className="pop-avatar pop-avatar-lg" alt="Profile photo" />
+}
 
 const registerSchema = Yup.object({
     ...profileShape,
@@ -88,9 +96,7 @@ const Register = () => {
                             <Formik initialValues={initialValues} validationSchema={registerSchema} onSubmit={submit}>
                                 <Form noValidate>
                                     <div className="d-flex align-items-center gap-3 mb-3">
-                                        {avatarPreview
-                                            ? <img src={avatarPreview} alt="Avatar preview" className="pop-avatar pop-avatar-lg" />
-                                            : <span className="pop-avatar pop-avatar-lg pop-avatar-fallback">?</span>}
+                                        <RegisterAvatar preview={avatarPreview} />
                                         <div className="flex-grow-1">
                                             <label htmlFor="avatar" className="form-label">Profile photo (optional)</label>
                                             <input

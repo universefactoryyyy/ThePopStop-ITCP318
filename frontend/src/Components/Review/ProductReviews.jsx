@@ -15,12 +15,7 @@ import { getProductDetails } from '../../actions/productActions'
 import { NEW_REVIEW_RESET, DELETE_REVIEW_RESET } from '../../constants/reviewConstants'
 import { errMsg, successMsg, formatDate } from '../../Utils/helpers'
 import ReviewForm from './ReviewForm'
-
-const Avatar = ({ user }) => (
-    user && user.avatar && user.avatar.url
-        ? <img src={user.avatar.url} alt="" className="pop-avatar" />
-        : <span className="pop-avatar pop-avatar-fallback">{(user && user.name ? user.name : '?').charAt(0).toUpperCase()}</span>
-)
+import UserAvatar from '../Layout/UserAvatar'
 
 // Ratings & reviews of one product:
 //  - only customers with a DELIVERED order containing the product can write a review (and later edit it)
@@ -155,7 +150,7 @@ const ProductReviews = ({ product }) => {
                     {visibleReviews.map(review => (
                         <li key={review._id} className="card mb-3">
                             <div className="card-body d-flex gap-3">
-                                <Avatar user={review.user} />
+                                <UserAvatar user={review.user} />
                                 <div className="flex-grow-1">
                                     <div className="d-flex flex-wrap justify-content-between align-items-start">
                                         <div>

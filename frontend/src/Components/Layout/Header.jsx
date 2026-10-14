@@ -6,9 +6,9 @@ import Badge from '@mui/material/Badge'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCartOutlined'
 import { toast } from 'react-toastify'
 import Search from './Search'
+import UserAvatar from './UserAvatar'
 import { logout } from '../../actions/userActions'
 import { clearCart } from '../../actions/cartActions'
-import { PLACEHOLDER_IMAGE } from '../../Utils/helpers'
 
 const Header = () => {
     const dispatch = useDispatch();
@@ -36,25 +36,25 @@ const Header = () => {
 
     return (
         <Navbar expand="lg" sticky="top" className="pop-navbar" expanded={expanded} onToggle={setExpanded}>
-            <Container fluid="xl">
+            <Container fluid="xl" className="pop-navbar-bar">
                 <Navbar.Brand as={Link} to="/" className="pop-brand">
-                    <img src="/favicon.svg" alt="" width="34" height="34" />
+                    <img src="/logo.png" alt="" />
                     <span>The Pop Stop</span>
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="main-nav" />
-                <Navbar.Collapse id="main-nav">
-                    <Nav className="me-lg-3">
+                <Navbar.Collapse id="main-nav" className="pop-navbar-collapse">
+                    <Nav className="pop-nav-links">
                         <Nav.Link as={NavLink} to="/" end>Home</Nav.Link>
                         <Nav.Link as={NavLink} to="/products">Products</Nav.Link>
                         <Nav.Link as={NavLink} to="/about">About</Nav.Link>
                     </Nav>
 
-                    <div className="flex-grow-1 my-2 my-lg-0 me-lg-3">
+                    <div className="pop-navbar-search">
                         <Search />
                     </div>
 
-                    <Nav className="align-items-lg-center">
-                        <Nav.Link as={Link} to="/cart" aria-label="Cart">
+                    <Nav className="pop-nav-actions">
+                        <Nav.Link as={Link} to="/cart" aria-label="Cart" className="pop-cart-link">
                             <Badge badgeContent={cartCount} color="primary" showZero={false}>
                                 <ShoppingCartIcon />
                             </Badge>
@@ -64,14 +64,11 @@ const Header = () => {
                         {loading ? null : isAuthenticated && user ? (
                             <NavDropdown
                                 align="end"
+                                className="pop-user-dropdown"
                                 id="user-menu"
                                 title={
                                     <span className="pop-user-toggle">
-                                        <img
-                                            src={(user.avatar && user.avatar.url) || PLACEHOLDER_IMAGE}
-                                            alt=""
-                                            className="pop-avatar-sm"
-                                        />
+                                        <UserAvatar user={user} className="pop-avatar-sm" />
                                         <span>{user.fname || user.name}</span>
                                     </span>
                                 }

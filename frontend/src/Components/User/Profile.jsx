@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import MetaData from '../Layout/MetaData'
 import Loader from '../Layout/Loader'
+import UserAvatar from '../Layout/UserAvatar'
 import { formatDate } from '../../Utils/helpers'
 
 const Profile = () => {
@@ -17,9 +18,7 @@ const Profile = () => {
             </div>
             <div className="row justify-content-center">
                 <div className="col-md-4 col-lg-3 text-center mb-4">
-                    {user.avatar && user.avatar.url
-                        ? <img src={user.avatar.url} alt={user.name} className="pop-avatar pop-avatar-xl mb-3" />
-                        : <span className="pop-avatar pop-avatar-xl pop-avatar-fallback mb-3">{user.name.charAt(0).toUpperCase()}</span>}
+                    <UserAvatar user={user} className="pop-avatar pop-avatar-xl mb-3" alt={user.name} />
                     <div className="d-grid gap-2">
                         <Link to="/me/update" className="btn btn-primary">Edit profile</Link>
                         {user.role !== 'admin' && <Link to="/orders/me" className="btn btn-outline-primary">My orders</Link>}

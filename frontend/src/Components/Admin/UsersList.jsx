@@ -8,6 +8,7 @@ import { allUsers, deleteUser, clearErrors } from '../../actions/userActions'
 import { DELETE_USER_RESET } from '../../constants/userConstants'
 import { errMsg, successMsg, formatDate } from '../../Utils/helpers'
 import MetaData from '../Layout/MetaData'
+import UserAvatar from '../Layout/UserAvatar'
 
 const UsersList = () => {
     const dispatch = useDispatch()
@@ -57,11 +58,7 @@ const UsersList = () => {
             width: 70,
             sortable: false,
             filterable: false,
-            renderCell: (params) => (
-                params.row.avatar && params.row.avatar.url
-                    ? <img src={params.row.avatar.url} alt="" className="pop-avatar" />
-                    : <span className="pop-avatar pop-avatar-fallback">{params.row.name.charAt(0).toUpperCase()}</span>
-            ),
+            renderCell: (params) => <UserAvatar user={params.row} />,
         },
         { field: 'name', headerName: 'Name', flex: 1, minWidth: 160 },
         { field: 'email', headerName: 'Email', flex: 1.2, minWidth: 200 },
@@ -86,7 +83,7 @@ const UsersList = () => {
             sortable: false,
             filterable: false,
             renderCell: (params) => (
-                <div className="d-flex gap-2 align-items-center h-100">
+                <div className="pop-grid-actions">
                     <Link to={`/admin/user/${params.row._id}`} className="btn btn-sm btn-outline-primary">Edit</Link>
                     <button
                         type="button"

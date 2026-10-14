@@ -49,7 +49,7 @@ const ListOrders = () => {
             sortable: false,
             filterable: false,
             renderCell: (params) => (
-                <div className="d-flex gap-2 align-items-center h-100">
+                <div className="pop-grid-actions">
                     <Link to={`/order/${params.row._id}`} className="btn btn-sm btn-outline-primary">View</Link>
                     <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => handleReceipt(params.row)}>Receipt</button>
                 </div>
