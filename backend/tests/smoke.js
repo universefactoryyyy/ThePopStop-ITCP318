@@ -191,6 +191,13 @@ const run = async () => {
         const r2 = await cust2.form('POST', '/register', { idToken: 'tok-cust2', fname: 'Dan', lname: 'Dee', phone: '09123456780', addressline: '2 Beige Ave' });
         assert.strictEqual(r2.status, 201);
     });
+    await step('logout removes the session token', async () => {
+        const session = makeClient();
+        assert.strictEqual((await session.post('/login', { idToken: 'tok-cust1' })).status, 200);
+        assert.strictEqual((await session.get('/me')).status, 200);
+        assert.strictEqual((await session.get('/logout')).status, 200);
+        assert.strictEqual((await session.get('/me')).status, 401);
+    });
     await step('username lookup returns the email for login', async () => {
         const ok = await guest.post('/login/lookup', { identifier: 'CARA_C' });
         assert.strictEqual(ok.data.email, 'cust1@example.com');
@@ -274,7 +281,8 @@ const run = async () => {
         assert.strictEqual(r.data.product.sku, 'PM-DIM-001');
         newProductId = r.data.product._id;
         const dup = await admin.form('POST', '/admin/product/new', fields, [{ field: 'images', name: 'a.png' }]);
-        assert.strictEqual(dup.status, 409);
+        assert.strictEqual(dup.status, 201, JSON.stringify(dup.data));
+        assert.strictEqual(dup.data.product.sku, 'PM-DIM-002');
         const noPhoto = await admin.form('POST', '/admin/product/new', { ...fields, sku: 'X-1' });
         assert.strictEqual(noPhoto.status, 400);
         const negative = await admin.form('POST', '/admin/product/new', { ...fields, sku: 'X-2', price: '-5' }, [{ field: 'images', name: 'a.png' }]);
@@ -300,13 +308,13 @@ const run = async () => {
         assert.strictEqual((await admin.get(`/product/${newProductId}`)).status, 200);
         const bulk = await admin.del('/admin/products', { ids: [a, b] });
         assert.strictEqual(bulk.data.deletedCount, 2);
-        assert.strictEqual((await guest.get('/products')).data.filteredProductsCount, 22);
-        assert.strictEqual((await admin.get('/admin/products')).data.products.length, 25);
+        assert.strictEqual((await guest.get('/products')).data.filteredProductsCount, 23);
+        assert.strictEqual((await admin.get('/admin/products')).data.products.length, 26);
         assert.strictEqual((await admin.del('/admin/products', { ids: [] })).status, 400);
         await admin.put(`/admin/product/${a}/restore`);
         await admin.put(`/admin/product/${b}/restore`);
         await admin.put(`/admin/product/${newProductId}/restore`);
-        assert.strictEqual((await guest.get('/products')).data.filteredProductsCount, 25);
+        assert.strictEqual((await guest.get('/products')).data.filteredProductsCount, 26);
     });
 
     // ---------- cart + discounts + checkout ----------
@@ -501,6 +509,9 @@ const run = async () => {
         assert.strictEqual((await guest.post('/login', { idToken: 'tok-cust1' })).status, 403);
         await admin.put(`/admin/user/${cara._id}`, { isActive: true });
         assert.strictEqual((await cust1.get('/me')).status, 200);
+        assert.strictEqual((await admin.put(`/admin/user/${cara._id}`, { role: 'employee' })).data.user.role, 'employee');
+        assert.strictEqual((await cust1.get('/admin/products')).status, 403);
+        await admin.put(`/admin/user/${cara._id}`, { role: 'customer' });
         const dan = users.find(u => u.email === 'cust2@example.com');
         assert.strictEqual((await admin.del(`/admin/user/${dan._id}`)).status, 200);
         assert.strictEqual((await cust2.get('/me')).status, 401);
@@ -512,8 +523,10 @@ const run = async () => {
         assert.deepStrictEqual(m.data.salesPerMonth.map(x => x.month), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
         const sum = m.data.salesPerMonth.reduce((s, x) => s + x.total, 0);
         assert.ok(sum > 0);
-        const today = new Date().toISOString().slice(0, 10);
-        const start = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10);
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+        const startDate = new Date(`${today}T00:00:00Z`);
+        startDate.setUTCDate(startDate.getUTCDate() - 6);
+        const start = startDate.toISOString().slice(0, 10);
         const range = await admin.get(`/admin/sales?start=${start}&end=${today}`);
         assert.strictEqual(range.data.sales.length, 7);
         assert.ok(range.data.totalSales > 0);
@@ -522,7 +535,7 @@ const run = async () => {
         assert.ok((await admin.get('/admin/customer-sales')).data.customerSales.length >= 1);
         assert.ok((await admin.get('/admin/brand-sales')).data.brandSales.length >= 1);
         const stats = (await admin.get('/admin/stats')).data.stats;
-        assert.ok(stats.totalOrders >= 3 && stats.totalProducts === 25);
+        assert.ok(stats.totalOrders >= 3 && stats.totalProducts === 26);
         assert.ok(stats.completedOrders >= 1);
     });
     await step('unknown routes and malformed ids return JSON 404', async () => {

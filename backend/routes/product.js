@@ -4,6 +4,7 @@ const upload = require("../utils/multer");
 
 const {
     newProduct,
+    previewSku,
     getSingleProduct,
     getProducts,
     suggestProducts,
@@ -24,6 +25,7 @@ router.get('/product/:id', optionalUser, getSingleProduct)
 
 // admin product CRUD (multiple photos => Cloudinary)
 router.get('/admin/products', isAuthenticatedUser, authorizeRoles('admin'), getAdminProducts);
+router.get('/admin/product-sku', isAuthenticatedUser, authorizeRoles('admin'), previewSku);
 router.delete('/admin/products', isAuthenticatedUser, authorizeRoles('admin'), bulkDeleteProducts);
 router.post('/admin/product/new', isAuthenticatedUser, authorizeRoles('admin'), upload.array('images', 10), newProduct);
 router.route('/admin/product/:id')

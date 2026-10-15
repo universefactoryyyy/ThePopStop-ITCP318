@@ -3,6 +3,7 @@ const Product = require('../models/product')
 const Cart = require('../models/cart')
 const APIFeatures = require('../utils/apiFeatures');
 const { uploadFiles, destroyImages, discardFiles } = require('../utils/cloudinaryUpload');
+const { skuPrefix, nextSku } = require('../utils/sku');
 
 const IMAGE_OPTIONS = { width: 1000, crop: 'limit' };
 
@@ -35,7 +36,6 @@ const parseProductBody = (body, partial = false) => {
     text('name', 'Name');
     text('series', 'Series / category');
     text('brand', 'Brand');
-    text('sku', 'SKU');
     text('description', 'Description');
     number('price', 'Price', { min: 0.01 });
     number('costPrice', 'Cost price', { required: false });
@@ -59,7 +59,16 @@ exports.newProduct = async (req, res, next) => {
 
     let product;
     try {
-        product = await Product.create({ ...data, images, user: req.user.id });
+        for (let attempt = 0; attempt < 2; attempt++) {
+            data.sku = await nextSku(data.brand, data.series);
+            try {
+                product = await Product.create({ ...data, images, user: req.user.id });
+                break;
+            } catch (error) {
+                if (error.code === 11000 && attempt === 0) continue;
+                throw error;
+            }
+        }
     } catch (error) {
         await destroyImages(images);
         throw error;
@@ -70,6 +79,26 @@ exports.newProduct = async (req, res, next) => {
         product
     })
 }
+
+// Next SKU for a brand and category: BRAND-CATEGORY-001   =>  /api/v1/admin/product-sku
+exports.previewSku = async (req, res) => {
+    const brand = String(req.query.brand || '').trim();
+    const series = String(req.query.series || '').trim();
+    if (!brand || !series) {
+        return res.status(400).json({ success: false, message: 'Brand and series are required' });
+    }
+    const excludeId = mongoose.isValidObjectId(req.query.exclude) ? req.query.exclude : null;
+    if (excludeId) {
+        const current = await Product.findById(excludeId).select('sku brand series');
+        if (current && current.brand === brand && current.series === series) {
+            return res.status(200).json({ success: true, sku: current.sku });
+        }
+    }
+    return res.status(200).json({
+        success: true,
+        sku: await nextSku(brand, series, excludeId)
+    });
+};
 
 // Public catalog: search + filters + pagination (used by the infinite scroll)   =>  /api/v1/products
 exports.getProducts = async (req, res) => {
@@ -195,6 +224,12 @@ exports.updateProduct = async (req, res, next) => {
     if (errors.length) {
         discardFiles(files);
         return res.status(400).json({ success: false, message: errors.join(', ') })
+    }
+
+    const brand = data.brand || product.brand;
+    const series = data.series || product.series;
+    if ((data.brand || data.series) && !String(product.sku).toUpperCase().startsWith(skuPrefix(brand, series))) {
+        data.sku = await nextSku(brand, series, product._id);
     }
 
     const removedImages = product.images.filter(img => !keptImages.some(k => k.public_id === img.public_id));

@@ -132,7 +132,6 @@ export const register = (userData, email, password) => async (dispatch) => {
 export const logout = () => async (dispatch) => {
     try {
         await axios.get(`${API}/logout`)
-        try { await signOut(auth) } catch (e) { /* ignore */ }
         dispatch({
             type: LOGOUT_SUCCESS,
         })
@@ -141,6 +140,8 @@ export const logout = () => async (dispatch) => {
             type: LOGOUT_FAIL,
             payload: getErrorMessage(error)
         })
+    } finally {
+        try { await signOut(auth) } catch (e) { /* Firebase session is separate from the cookie */ }
     }
 }
 

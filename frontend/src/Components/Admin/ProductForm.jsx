@@ -1,19 +1,51 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { Formik, Form } from 'formik'
+import { Formik, Form, useFormikContext } from 'formik'
 import * as Yup from 'yup'
-import { getFilterOptions } from '../../actions/productActions'
+import { getFilterOptions, getNextSku } from '../../actions/productActions'
 import { validateImageFile } from '../../Utils/validation'
 import FormField from '../Layout/FormField'
 
+const KNOWN_BRANDS = ['Funko', 'Pop Mart']
+const KNOWN_SERIES = ['Anime', 'Crybaby', 'DC Comics', 'Games', 'Marvel', 'Pino Jelly', 'Skullpanda', 'The Monster']
 const MAX_PHOTOS = 10
+
+const optionList = (known, fromApi, current) =>
+    [...new Set([...known, ...(fromApi || []), current].filter(Boolean))].sort((a, b) => a.localeCompare(b))
+
+const SkuField = ({ productId }) => {
+    const { values, setFieldValue } = useFormikContext()
+
+    useEffect(() => {
+        if (!values.brand || !values.series) {
+            setFieldValue('sku', '')
+            return undefined
+        }
+        let ignore = false
+        getNextSku(values.brand, values.series, productId)
+            .then(sku => { if (!ignore) setFieldValue('sku', sku) })
+            .catch(() => { if (!ignore) setFieldValue('sku', '') })
+        return () => { ignore = true }
+    }, [values.brand, values.series, productId, setFieldValue])
+
+    return (
+        <FormField
+            className="col-md-4"
+            label="SKU"
+            name="sku"
+            type="text"
+            readOnly
+            help="Filled in from the brand, category, and the next number"
+        />
+    )
+}
 
 const productSchema = Yup.object({
     name: Yup.string().trim().required('Product name is required').max(150, 'Max 150 characters'),
     series: Yup.string().trim().required('Series / category is required').max(60, 'Max 60 characters'),
     brand: Yup.string().trim().required('Brand is required').max(60, 'Max 60 characters'),
-    sku: Yup.string().trim().required('SKU is required').max(40, 'Max 40 characters'),
+    sku: Yup.string().trim(),
     price: Yup.number().typeError('Price must be a number').required('Price is required').moreThan(0, 'Price must be greater than 0').max(9999999, 'Price is too large'),
     costPrice: Yup.number().typeError('Cost price must be a number').min(0, 'Cost price cannot be negative').nullable().transform((value, original) => (original === '' ? null : value)),
     stock: Yup.number().typeError('Stock must be a number').required('Stock is required').integer('Stock must be a whole number').min(0, 'Stock cannot be negative'),
@@ -34,6 +66,8 @@ const ProductForm = ({ product, onSubmit, submitting, submitLabel }) => {
     }, [dispatch])
 
     const existing = useMemo(() => (product && product.images ? product.images : []), [product])
+    const brandOptions = optionList(KNOWN_BRANDS, brands, product && product.brand)
+    const seriesOptions = optionList(KNOWN_SERIES, series, product && product.series)
     const keptExisting = existing.filter(image => !removed.includes(image.public_id))
 
     const previews = useMemo(() => newFiles.map(file => URL.createObjectURL(file)), [newFiles])
@@ -88,14 +122,18 @@ const ProductForm = ({ product, onSubmit, submitting, submitLabel }) => {
                 <div className="card-body">
                     <div className="row">
                         <FormField className="col-md-8" label="Name" name="name" type="text" />
-                        <FormField className="col-md-4" label="SKU" name="sku" type="text" />
+                        <SkuField productId={product && product._id} />
                     </div>
                     <div className="row">
-                        <FormField className="col-md-6" label="Series / category" name="series" type="text" list="series-options" />
-                        <FormField className="col-md-6" label="Brand" name="brand" type="text" list="brand-options" />
+                        <FormField className="col-md-6" label="Series / category" name="series" as="select">
+                            <option value="">Select a category</option>
+                            {seriesOptions.map(name => <option key={name} value={name}>{name}</option>)}
+                        </FormField>
+                        <FormField className="col-md-6" label="Brand" name="brand" as="select">
+                            <option value="">Select a brand</option>
+                            {brandOptions.map(name => <option key={name} value={name}>{name}</option>)}
+                        </FormField>
                     </div>
-                    <datalist id="series-options">{series.map(s => <option key={s} value={s} />)}</datalist>
-                    <datalist id="brand-options">{brands.map(b => <option key={b} value={b} />)}</datalist>
                     <div className="row">
                         <FormField className="col-md-4" label="Price (PHP)" name="price" type="number" step="0.01" min="0" />
                         <FormField className="col-md-4" label="Cost price (optional)" name="costPrice" type="number" step="0.01" min="0" />

@@ -12,7 +12,7 @@ import FormField from '../Layout/FormField'
 
 const schema = Yup.object({
     name: Yup.string().trim().required('Name is required').max(60, 'Max 60 characters'),
-    role: Yup.string().oneOf(['customer', 'admin']).required(),
+    role: Yup.string().oneOf(['customer', 'employee', 'admin']).required(),
     isActive: Yup.string().oneOf(['true', 'false']).required(),
 })
 
@@ -71,6 +71,7 @@ const UpdateUser = () => {
                             <FormField label="Name" name="name" type="text" />
                             <FormField label="Role" name="role" as="select" disabled={isSelf} help={isSelf ? 'You cannot change your own role' : undefined}>
                                 <option value="customer">Customer</option>
+                                <option value="employee">Employee</option>
                                 <option value="admin">Admin</option>
                             </FormField>
                             <FormField

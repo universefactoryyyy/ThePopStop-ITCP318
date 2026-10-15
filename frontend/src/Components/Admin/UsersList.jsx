@@ -71,8 +71,11 @@ const UsersList = () => {
         {
             field: 'role',
             headerName: 'Role',
-            width: 110,
-            renderCell: (params) => <span className={`badge ${params.value === 'admin' ? 'bg-primary text-dark' : 'bg-secondary'}`}>{params.value}</span>,
+            width: 130,
+            renderCell: (params) => {
+                const tone = params.value === 'admin' ? 'bg-primary text-dark' : params.value === 'employee' ? 'bg-info text-dark' : 'bg-secondary'
+                return <span className={`badge ${tone}`}>{params.value}</span>
+            },
         },
         {
             field: 'isActive',

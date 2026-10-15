@@ -2,6 +2,7 @@ const cookieOptions = () => {
     const isProduction = process.env.NODE_ENV === 'production';
     return {
         httpOnly: true,
+        path: '/',
         // browsers only accept SameSite=None cookies over https
         secure: isProduction,
         sameSite: process.env.COOKIE_SAMESITE || (isProduction ? 'none' : 'lax'),

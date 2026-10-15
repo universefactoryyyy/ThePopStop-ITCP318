@@ -268,7 +268,7 @@ exports.updateUser = async (req, res, next) => {
     const { role, isActive, name } = req.body;
 
     if (role !== undefined) {
-        if (!['customer', 'admin'].includes(role)) return res.status(400).json({ message: 'Role must be customer or admin' });
+        if (!['customer', 'employee', 'admin'].includes(role)) return res.status(400).json({ message: 'Role must be customer, employee, or admin' });
         if (isSelf && role !== user.role) return res.status(400).json({ message: 'You cannot change your own role' });
         user.role = role;
     }
@@ -309,7 +309,9 @@ exports.deleteUser = async (req, res, next) => {
 }
 
 exports.logout = async (req, res, next) => {
-    res.clearCookie('token', sendToken.cookieOptions())
+    const options = sendToken.cookieOptions();
+    res.cookie('token', '', { ...options, expires: new Date(0), maxAge: 0 });
+    res.clearCookie('token', options);
 
     return res.status(200).json({
         success: true,

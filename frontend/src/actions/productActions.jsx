@@ -208,3 +208,8 @@ export const clearErrors = () => async (dispatch) => {
         type: CLEAR_ERRORS
     })
 }
+
+export const getNextSku = async (brand, series, exclude) => {
+    const { data } = await axios.get(`${API}/admin/product-sku`, { params: { brand, series, exclude: exclude || undefined } })
+    return data.sku
+}
