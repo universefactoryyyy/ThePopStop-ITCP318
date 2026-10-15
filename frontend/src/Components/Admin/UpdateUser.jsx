@@ -73,7 +73,13 @@ const UpdateUser = () => {
                                 <option value="customer">Customer</option>
                                 <option value="admin">Admin</option>
                             </FormField>
-                            <FormField label="Account status" name="isActive" as="select" disabled={isSelf}>
+                            <FormField
+                                label="Account status"
+                                name="isActive"
+                                as="select"
+                                disabled={isSelf || user.role === 'admin'}
+                                help={user.role === 'admin' ? 'Admin accounts stay active' : undefined}
+                            >
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
                             </FormField>

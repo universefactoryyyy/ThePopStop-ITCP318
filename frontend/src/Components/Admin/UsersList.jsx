@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid'
 import Swal from 'sweetalert2'
 import SearchIcon from '@mui/icons-material/Search'
-import { allUsers, deleteUser, clearErrors } from '../../actions/userActions'
-import { DELETE_USER_RESET } from '../../constants/userConstants'
+import { allUsers, updateUser, clearErrors } from '../../actions/userActions'
+import { UPDATE_USER_RESET } from '../../constants/userConstants'
 import { errMsg, successMsg, formatDate } from '../../Utils/helpers'
 import MetaData from '../Layout/MetaData'
 import UserAvatar from '../Layout/UserAvatar'
@@ -13,9 +13,9 @@ import UserAvatar from '../Layout/UserAvatar'
 const UsersList = () => {
     const dispatch = useDispatch()
     const { loading, error, users } = useSelector(state => state.allUsers)
-    const { user: me } = useSelector(state => state.auth)
-    const { error: actionError, isDeleted } = useSelector(state => state.user)
+    const { error: actionError, isUpdated } = useSelector(state => state.user)
     const [search, setSearch] = useState('')
+    const [notice, setNotice] = useState('')
 
     useEffect(() => {
         dispatch(allUsers())
@@ -27,22 +27,27 @@ const UsersList = () => {
     }, [error, actionError, dispatch])
 
     useEffect(() => {
-        if (isDeleted) {
-            successMsg('User deleted')
-            dispatch({ type: DELETE_USER_RESET })
+        if (isUpdated) {
+            successMsg(notice || 'User updated')
+            dispatch({ type: UPDATE_USER_RESET })
             dispatch(allUsers())
         }
-    }, [isDeleted, dispatch])
+    }, [isUpdated, notice, dispatch])
 
-    const confirmDelete = async (user) => {
+    const confirmStatus = async (user) => {
+        const turningOff = Boolean(user.isActive)
         const result = await Swal.fire({
-            title: `Delete ${user.name}?`,
-            text: 'The account is deactivated and removed from the list. Their past orders are kept.',
+            title: turningOff ? `Deactivate ${user.name}?` : `Activate ${user.name}?`,
+            text: turningOff
+                ? 'They will not be able to sign in. The account stays in this list.'
+                : 'They will be able to sign in again.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Delete',
+            confirmButtonText: turningOff ? 'Deactivate' : 'Activate',
         })
-        if (result.isConfirmed) dispatch(deleteUser(user._id))
+        if (!result.isConfirmed) return
+        setNotice(turningOff ? 'User deactivated' : 'User activated')
+        dispatch(updateUser(user._id, { isActive: !turningOff }))
     }
 
     const rows = useMemo(() => {
@@ -79,25 +84,30 @@ const UsersList = () => {
         {
             field: 'actions',
             headerName: 'Actions',
-            width: 170,
+            width: 220,
             sortable: false,
             filterable: false,
-            renderCell: (params) => (
-                <div className="pop-grid-actions">
-                    <Link to={`/admin/user/${params.row._id}`} className="btn btn-sm btn-outline-primary">Edit</Link>
-                    <button
-                        type="button"
-                        className="btn btn-sm btn-outline-danger"
-                        disabled={me && me._id === params.row._id}
-                        onClick={() => confirmDelete(params.row)}
-                    >
-                        Delete
-                    </button>
-                </div>
-            ),
+            renderCell: (params) => {
+                const active = Boolean(params.row.isActive)
+                const isAdminAccount = params.row.role === 'admin'
+                return (
+                    <div className="pop-grid-actions">
+                        <Link to={`/admin/user/${params.row._id}`} className="btn btn-sm btn-outline-primary">Edit</Link>
+                        {!isAdminAccount && (
+                            <button
+                                type="button"
+                                className={`btn btn-sm ${active ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                                onClick={() => confirmStatus(params.row)}
+                            >
+                                {active ? 'Deactivate' : 'Activate'}
+                            </button>
+                        )}
+                    </div>
+                )
+            },
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ], [dispatch, me])
+    ], [dispatch])
 
     return (
         <div>

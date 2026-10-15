@@ -273,7 +273,9 @@ exports.updateUser = async (req, res, next) => {
         user.role = role;
     }
     if (isActive !== undefined) {
-        if (isSelf && !isActive) return res.status(400).json({ message: 'You cannot deactivate your own account' });
+        if (!isActive && user.role === 'admin') {
+            return res.status(400).json({ message: 'You cannot deactivate an admin account' });
+        }
         user.isActive = Boolean(isActive);
     }
     if (name !== undefined && name.trim()) user.name = name.trim();
